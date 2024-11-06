@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#C4E6E4">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="15dp"
+        tools:layout_editor_absoluteY="15dp">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/schooltab"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="#FFFFFF"
+                app:tabIndicatorColor="#FFFFFF"
+                app:tabIndicatorHeight="2dp"
+                app:tabSelectedTextColor="#3F51B5"
+                app:tabTextColor="#3F51B5">
+
+                <com.google.android.material.tabs.TabItem
+                    android:id="@+id/taball"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="전체" />
+            </com.google.android.material.tabs.TabLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/maprow"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <fragment
+                    android:id="@+id/map"
+                    android:name="com.google.android.gms.maps.SupportMapFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="bottom"
+                    android:layout_weight="1"
+                    tools:context=".Fragment_maps" />
+
+                <Button
+                    android:id="@+id/schedule_school"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="bottom|end"
+                    android:background="@drawable/schedulecicon" />
+
+            </FrameLayout>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/maprow">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView11"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#F4F4F4"
+                    android:gravity="center"
+                    android:text="운행 정보" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="#CCCCCC" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/RunList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#FFFFFF" />
+            </LinearLayout>
+        </TableRow>
+    </TableLayout>
+    <FrameLayout
+        android:id="@+id/progressBar_maps"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#8AE1E1E1"
+        android:clickable="true"
+        android:visibility="gone">
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminateTint="#BFCBF8"
+            tools:ignore="MissingConstraints" />
+    </FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

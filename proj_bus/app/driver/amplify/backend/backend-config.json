@@ -1,0 +1,22 @@
+{
+  "api": {
+    "busboridriver": {
+      "dependsOn": [],
+      "output": {
+        "authConfig": {
+          "additionalAuthenticationProviders": [],
+          "defaultAuthentication": {
+            "apiKeyConfig": {
+              "apiKeyExpirationDate": "2024-09-23T09:00:09.964Z",
+              "apiKeyExpirationDays": 365,
+              "description": "da2-5etl2hiuujf7rcybhogd3jznya"
+            },
+            "authenticationType": "API_KEY"
+          }
+        }
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "AppSync"
+    }
+  }
+}

@@ -1,0 +1,66 @@
+plugins {
+    id 'com.android.application'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+    id 'com.google.gms.google-services'
+}
+
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+
+android {
+    namespace 'com.kdu.busbori'
+    compileSdk 34
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/INDEX.LIST'
+    }
+
+    defaultConfig {
+        applicationId "com.kdu.busboridriver"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField("String", "AWS_ACCESS_KEY_ID", localProperties['AWS_ACCESS_KEY_ID'])
+            buildConfigField("String", "AWS_SECRET_ACCESS_KEY", localProperties['AWS_SECRET_ACCESS_KEY'])
+            buildConfigField("String", "PUBLIC_SERVICE_KEY", localProperties['PUBLIC_SERVICE_KEY'])
+            buildConfigField("String", "PUBLIC_ENDPOINT", localProperties['PUBLIC_ENDPOINT'])
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField("String", "AWS_ACCESS_KEY_ID", "\"${awsAccessKeyId}\"")
+            buildConfigField("String", "AWS_SECRET_ACCESS_KEY", "\"${awsSecretAccessKey}\"")
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    implementation 'com.amazonaws:aws-android-sdk-core:2.73.0'
+    implementation 'com.amazonaws:aws-android-sdk-ddb:2.73.0'
+    implementation 'com.amazonaws:aws-android-sdk-ddb-mapper:2.13.6'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.5.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+    implementation 'androidx.navigation:navigation-fragment:2.5.3'
+    implementation 'androidx.navigation:navigation-ui:2.5.3'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}

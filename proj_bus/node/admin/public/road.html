@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+    <link rel="stylesheet" type="text/css" href="admin_main.css">
+    <link rel="stylesheet" type="text/css" href="admin_style.css">
+</head>
+<body>
+    <div class="page">
+        <header>
+            <img src="https://imgur.com/te8FVKr.png">
+            <nav>
+                <ul>
+                    <li><a href="main.html">메인 화면</a></li>
+                    <li><a href="admin1.html">권한 수정</a></li>
+                    <li><a href="road.html">노선 수정</a></li>
+                    <li><a href="bus.html">배차 수정</a></li>
+                </ul>
+            </nav>
+        </header>
+    </div>
+
+    <div class="box effect3">
+        <h2>노선 추가 및 수정</h2>
+        <h4>추가 또는 수정할 노선 정보를 입력해주세요.</h4>
+        <form id="addBusRouteForm">
+            <label for="stationNameInput">정류장 이름:</label>
+            <input type="text" id="stationNameInput" required>
+
+            <label for="latitudeInput">위도:</label>
+            <input type="number" id="latitudeInput" step="0.000001" required>
+
+            <label for="longitudeInput">경도:</label>
+            <input type="number" id="longitudeInput" step="0.000001" required>
+
+            <button type="submit">노선 추가 / 수정</button>
+            <button type="reset" id="resetButton">초기화</button>
+        </form>
+        <p id="addBusRouteStatusMessage"></p>
+    </div>
+
+    <div class="box effect2">
+        <h2>노선 삭제</h2>
+        <h4>삭제할 버스 노선을 선택해주세요.</h4>
+        <select id="busRouteList"></select>
+        <button id="deleteBusRouteButton">노선 삭제</button>
+        <p id="busRouteStatusMessage"></p>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+
+            function updateFields(selectedRoute) {
+                $('#stationNameInput').val(selectedRoute.stationName);
+                $('#latitudeInput').val(selectedRoute.latitude);
+                $('#longitudeInput').val(selectedRoute.longitude);
+            }
+
+            $('#resetButton').on('click', function () {
+                clearFields();
+            });
+
+            const busRouteList = document.getElementById("busRouteList");
+            const deleteBusRouteButton = document.getElementById("deleteBusRouteButton");
+            const busRouteStatusMessage = document.getElementById("busRouteStatusMessage");
+
+            try {
+                const busRouteResponse = await fetch('/bus-routes');
+                let busRoutes = await busRouteResponse.json();
+
+                if (busRoutes.length > 0) {
+                    busRoutes = busRoutes.sort((a, b) => a.stationName.localeCompare(b.stationName, 'ko-KR'));
+
+                    busRoutes.forEach(route => {
+                        const option = document.createElement("option");
+                        option.value = route.stationName;
+                        option.text = route.stationName + " (Latitude: " + route.latitude + ", Longitude: " + route.longitude + ")";
+                        busRouteList.appendChild(option);
+                    });
+
+                    busRouteList.addEventListener("change", function () {
+                        const selectedIndex = busRouteList.selectedIndex;
+                        const selectedRoute = busRoutes[selectedIndex];
+                        updateFields(selectedRoute);
+                    });
+
+                } else {
+                    busRouteStatusMessage.textContent = '노선이 존재하지 않습니다.';
+                }
+            } catch (error) {
+                console.error("Error fetching bus route data:", error);
+                busRouteStatusMessage.textContent = 'Error fetching bus route data';
+            }
+
+            deleteBusRouteButton.addEventListener("click", async () => {
+                const selectedRouteId = busRouteList.value;
+                if (selectedRouteId) {
+                    const confirmDelete = confirm('정말로 삭제하시겠습니까?');
+            
+                    if (confirmDelete) {
+                        const response = await fetch(`/delete-bus-route?stationName=${selectedRouteId}`, { method: 'POST' });
+                        const data = await response.json();
+                        busRouteStatusMessage.textContent = data.message;
+                        location.reload();
+                    }
+                }
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", async function () {
+
+            const addBusRouteForm = document.getElementById("addBusRouteForm");
+            const addBusRouteStatusMessage = document.getElementById("addBusRouteStatusMessage");
+
+            addBusRouteForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const stationNameInput = document.getElementById("stationNameInput");
+                const latitudeInput = document.getElementById("latitudeInput");
+                const longitudeInput = document.getElementById("longitudeInput");
+
+                const newRouteData = {
+                    stationName: stationNameInput.value,
+                    latitude: latitudeInput.value,
+                    longitude: longitudeInput.value
+                };
+
+                try {
+                    const response = await fetch('/add-bus-route', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(newRouteData)
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        addBusRouteStatusMessage.textContent = '노선 추가를 성공했습니다.';
+                        stationNameInput.value = '';
+                        latitudeInput.value = '';
+                        longitudeInput.value = '';
+                    } else {
+                        addBusRouteStatusMessage.textContent = 'Error adding bus route';
+                    }
+                } catch (error) {
+                    console.error("Error adding bus route:", error);
+                    addBusRouteStatusMessage.textContent = 'Error adding bus route';
+                }
+                location.reload();
+            });
+        });
+
+
+        $(document).ready(function () {
+            $('#buttonForm').submit(function (e) {
+                e.preventDefault();
+
+                const assort = $('#assort').val();
+                const destination = $('#destination').val();
+                const type = $('#type').val();
+                const time = $('#time').val();
+                const buttonText = $('#buttonText').val();
+
+                const data = {
+                    assort,
+                    destination,
+                    type,
+                    time,
+                    buttonText,
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/save-button-data',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        console.log('데이터가 성공적으로 저장되었습니다.');
+                    },
+                    error: function (err) {
+                        console.error('데이터 저장 중 오류가 발생했습니다:', err);
+                    },
+                });
+                location.reload();
+            });
+        });
+    </script>
+</body>
+</html>

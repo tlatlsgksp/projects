@@ -1,0 +1,6 @@
+{
+  "AppSyncApiName": "busboridriver",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthModeLastUpdated": "2023-09-24T09:03:47.014Z"
+}

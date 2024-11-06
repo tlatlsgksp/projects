@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" >
+    <item
+        android:width="8dp"
+        android:height="8dp"
+        android:gravity="top|left">
+        <vector
+            android:width="8dp"
+            android:height="8dp"
+            android:viewportWidth="8.0"
+            android:viewportHeight="8.0">
+            <path
+                android:pathData="M 0,0 8,0 0,8z"
+                android:fillColor="#462c94"/>
+        </vector>
+    </item>
+</layer-list>

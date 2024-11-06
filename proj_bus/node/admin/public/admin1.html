@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+    <link rel="stylesheet" type="text/css" href="admin_main.css">
+    <link rel="stylesheet" type="text/css" href="admin_style.css">
+</head>
+<body>
+    <div class="page">
+        <header>
+            <img src="https://imgur.com/te8FVKr.png">
+            <nav>
+                <ul>
+                    <li><a href="main.html">메인 화면</a></li>
+                    <li><a href="admin1.html">권한 수정</a></li>
+                    <li><a href="road.html">노선 수정</a></li>
+                    <li><a href="bus.html">배차 수정</a></li>
+                </ul>
+            </nav>
+        </header>
+    </div>
+
+    <div class="box effect1">
+        <h2>권한 수정</h2>
+        <h4>권한을 수정할 사용자를 선택해주세요.</h4>
+        <select id="userList"></select>
+        <button id="grantAccessButton">권한 허용</button>
+        <button id="revokeAccessButton">권한 취소</button>
+        <p id="statusMessage"></p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            const userList = document.getElementById("userList");
+            const grantAccessButton = document.getElementById("grantAccessButton");
+            const revokeAccessButton = document.getElementById("revokeAccessButton");
+            const statusMessage = document.getElementById("statusMessage");
+
+            try {
+                const response = await fetch('/users');
+                let users = await response.json();
+
+                if (users.length > 0) {
+                    users = users.sort((a, b) => (a.name > b.name) ? -1 : 1);
+
+                    users.forEach(user => {
+                        const option = document.createElement("option");
+                        option.value = user.deviceid;
+                        option.text = user.name + "-" + user.deviceid + "[" + user.Access + "]";
+                        userList.appendChild(option);
+                    });
+                } else {
+                    statusMessage.textContent = '사용자가 존재하지 않습니다.';
+                }
+            } catch (error) {
+                console.error("사용자 데이터를 가져오는 중 오류 발생:", error);
+                statusMessage.textContent = '사용자 데이터를 가져오는 중 오류 발생';
+            }
+
+            grantAccessButton.addEventListener("click", async () => {
+                const selectedDeviceId = userList.value;
+                if (selectedDeviceId) {
+                    const response = await fetch(`/grant-access?deviceid=${selectedDeviceId}`, { method: 'POST' });
+                    const data = await response.json();
+                    statusMessage.textContent = data.message;
+                    location.reload();
+                }
+            });
+
+            revokeAccessButton.addEventListener("click", async () => {
+                const selectedDeviceId = userList.value;
+                if (selectedDeviceId) {
+                    const response = await fetch(`/revoke-access?deviceid=${selectedDeviceId}`, { method: 'POST' });
+                    const data = await response.json();
+                    statusMessage.textContent = data.message;
+                    location.reload();
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            $('#buttonForm').submit(function (e) {
+                e.preventDefault();
+
+                const assort = $('#assort').val();
+                const destination = $('#destination').val();
+                const type = $('#type').val();
+                const time = $('#time').val();
+                const buttonText = $('#buttonText').val();
+
+                const data = {
+                    assort,
+                    destination,
+                    type,
+                    time,
+                    buttonText,
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/save-button-data',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        console.log('데이터가 성공적으로 저장되었습니다.');
+                    },
+                    error: function (err) {
+                        console.error('데이터 저장 중 오류가 발생했습니다:', err);
+                    },
+                });
+                location.reload();
+            });
+        });
+    </script>
+</body>
+</html>

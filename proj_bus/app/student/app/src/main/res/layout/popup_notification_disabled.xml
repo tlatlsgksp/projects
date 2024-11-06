@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/txtBanner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_banner"
+        android:backgroundTint="#DAE2FF"
+        android:gravity="center"
+        android:paddingStart="8dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp"
+        android:text="길게 눌러 알림 설정/해제"
+        android:textColor="#ffffff"
+        android:textSize="20sp"
+        tools:ignore="MissingConstraints" />
+
+    <ImageView
+        android:id="@+id/txtBannerTail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#FFDAE2FF"
+        android:background="@drawable/bg_banner_tail"
+        app:layout_constraintLeft_toRightOf="@+id/txtBanner"
+        tools:ignore="MissingConstraints" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

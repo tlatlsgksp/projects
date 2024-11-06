@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus List</title>
+    <style>
+        body {
+            font-family: 'Helvetica', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        .bus-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .bus-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .bus-list li {
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #e6f7ff;
+            transition: background-color 0.3s;
+        }
+
+        .bus-list li:hover {
+            background-color: #d4eaff;
+        }
+
+        .bus-list li.selected {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .bus-image-preview {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 30px;
+        }
+
+        .bus-image {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #e6f7ff;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus,
+        button:focus {
+            outline: none;
+            background-color: #d4eaff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bus List</h1>
+
+    <input type="text" id="busNoInput" placeholder="Enter Bus No">
+    <input type="file" id="imageFile" accept="image/*">
+    <button onclick="addBus()">추가</button>
+    
+    <div class="container">
+        <div class="bus-list">
+            <ul id="busList">
+                <!-- 여기에 버스 목록이 추가됩니다. -->
+            </ul>
+        </div>
+
+        <div class="bus-image-preview" id="imagePreview">
+            <!-- 여기에 이미지 미리보기가 표시됩니다. -->
+        </div>
+    </div>
+
+    <script>
+        let busList = [];
+
+        fetch(`/buslist_load`)
+        .then(response => response.json())
+        .then(data => {
+            busList = data.busList;
+            updateBusList();
+        })
+        .catch(error => {
+            console.error('Error loading bus list:', error);
+        });
+
+        function updateBusList() {
+            const busListContainer = document.getElementById('busList');
+            busListContainer.innerHTML = '';
+
+            busList.forEach(bus => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `No: ${bus.bus_no} `;
+                
+                listItem.addEventListener('click', () => {
+                    showImagePreview(bus.bus_url);
+                    highlightSelected(listItem);
+                });
+
+                const editNameButton = document.createElement('button');
+                editNameButton.textContent = '이름 변경';
+                editNameButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const editInput = document.createElement('input');
+                    editInput.type = 'text';
+                    editInput.value = bus.bus_no;
+                    editInput.addEventListener('blur', () => {
+                        bus.bus_no = editInput.value;
+                        updateBusList();
+                        saveBusList();
+                    });
+                    listItem.insertBefore(editInput, listItem.firstChild);
+                    editInput.focus();
+                });
+
+                const editButton = document.createElement('button');
+                editButton.textContent = '이미지 변경';
+                editButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const inputElement = document.createElement('input');
+                    inputElement.type = 'file';
+                    inputElement.accept = 'image/*';
+                    inputElement.addEventListener('change', (event) => {
+                        const newImageFile = event.target.files[0];
+                        if (newImageFile) {
+                            editImage(bus.bus_no, newImageFile);
+                        }
+                    });
+                    inputElement.click();
+                });
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '목록 삭제';
+                deleteButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    deleteList(bus.bus_no);
+                });
+
+                listItem.appendChild(editNameButton);
+                listItem.appendChild(editButton);
+                listItem.appendChild(deleteButton);
+                
+                busListContainer.appendChild(listItem);
+            });
+        }
+
+        function showImagePreview(imageUrl) {
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImage = document.createElement('img');
+            previewImage.src = imageUrl;
+            previewImage.alt = 'Bus Image Preview';
+            imagePreview.innerHTML = '';
+            imagePreview.appendChild(previewImage);
+            previewImage.classList.add('bus-image');
+        }
+
+        function highlightSelected(selectedItem) {
+            const busListItems = document.querySelectorAll('#busList li');
+            busListItems.forEach(item => {
+                item.classList.remove('selected');
+            });
+            selectedItem.classList.add('selected');
+        }
+
+        function addBus() {
+            const busNoInput = document.getElementById('busNoInput');
+            const busNo = busNoInput.value.trim();
+            if (busNo && !busList.some(bus => bus.bus_no === busNo)) {
+                addImage(busNo); // 이미지를 먼저 업로드
+                busNoInput.value = '';
+                document.getElementById('imageFile').value = '';
+            } else {
+                alert('중복된 값이거나 값이 없습니다.');
+            }
+        }
+
+        function addImage(busNo) {
+            const imageFile = document.getElementById('imageFile').files[0];
+
+            if (imageFile) {
+                const formData = new FormData();
+                formData.append('image', imageFile);
+                formData.append('busNo', busNo);
+                fetch('/upload_image', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Received imageUrl:', data.imageUrl);
+                    const imageUrl = data.imageUrl;
+                    busList.push({ bus_no: busNo, bus_url: imageUrl });
+                    updateBusList();
+                    saveBusList();
+                })
+                .catch(error => {
+                    console.error('Error uploading image:', error);
+                });
+            } else {
+                alert('이미지를 선택해주세요.');
+            }
+        }
+
+        function editImage(busNo, newImageFile) {
+            const formData = new FormData();
+            formData.append('image', newImageFile);
+            formData.append('busNo', busNo);
+            fetch('/upload_image', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Received edited imageUrl:', data.imageUrl);
+                const editedImageUrl = data.imageUrl;
+                // 이미지 URL 업데이트
+                busList.forEach(bus => {
+                    if (bus.bus_no === busNo) {
+                        bus.bus_url = editedImageUrl;
+                    }
+                });
+                updateBusList();
+                saveBusList();
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error editing image:', error);
+            });
+        }
+
+        function deleteList(busNo) {
+            const filteredList = busList.filter(bus => bus.bus_no !== busNo);
+            busList = filteredList;
+            updateBusList();
+            saveBusList();
+        }
+
+        function saveBusList() {
+            fetch('/buslist_save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ busList }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Bus list saved:', data);
+            })
+            .catch(error => {
+                console.error('There was a problem saving the bus list:', error);
+            });
+        }
+    </script>
+</body>
+</html>

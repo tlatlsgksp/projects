@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin</title>
+</head>
+<body>
+    <h2>권한 수정</h2>
+    <p>권한을 수정할 사용자를 선택해주세요.</p>
+    <select id="userList"></select>
+    <button id="grantAccessButton">권한 허용</button>
+    <button id="revokeAccessButton">권한 취소</button>
+    <p id="statusMessage"></p>
+
+    <h2>노선 수정</h2>
+    <p>삭제할 버스 노선을 선택해주세요.</p>
+    <select id="busRouteList"></select>
+    <button id="deleteBusRouteButton">노선 삭제</button>
+    <p id="busRouteStatusMessage"></p>
+
+    <h2>노선 추가</h2>
+    <p>추가할 노선 정보를 입력해주세요.</p>
+    <form id="addBusRouteForm">
+        <label for="stationNameInput">정류장 이름:</label>
+        <input type="text" id="stationNameInput" required>
+
+        <label for="latitudeInput">위도:</label>
+        <input type="number" id="latitudeInput" step="0.000001" required>
+
+        <label for="longitudeInput">경도:</label>
+        <input type="number" id="longitudeInput" step="0.000001" required>
+
+        <button type="submit">노선 추가</button>
+    </form>
+    <p id="addBusRouteStatusMessage"></p>
+
+    <h2>배차 삭제</h2>
+    <p>삭제할 배차 정보를 선택해주세요.</p>
+    <select id="buttonList"></select>
+    <button id="deleteButton">배차 삭제</button>
+    <p id="buttonStatusMessage"></p>
+
+    <h2>배차 추가</h2>
+    <p>추가할 배차 정보를 입력해주세요.</p>
+    <form id="buttonForm">
+        <label for="assort">분류:</label>
+        <input type="text" id="assort" name="assort" required>
+
+        <label for="destination">목적지:</label>
+        <input type="text" id="destination" name="destination" required>
+      
+        <label for="type">유형 (등교/하교):</label>
+        <input type="text" id="type" name="type" required>
+
+        <label for="time">시간:</label>
+        <input type="text" id="time" name="time" required>
+      
+        <label for="buttonText">배차 수:</label>
+        <input type="text" id="buttonText" name="buttonText" required>
+      
+        <button type="submit">배차 추가</button>
+      </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            const userList = document.getElementById("userList");
+            const grantAccessButton = document.getElementById("grantAccessButton");
+            const revokeAccessButton = document.getElementById("revokeAccessButton");
+            const statusMessage = document.getElementById("statusMessage");
+
+            try {
+                const response = await fetch('/users');
+                const users = await response.json();
+
+                if (users.length > 0) {
+                    users.forEach(user => {
+
+
+                        const option = document.createElement("option");
+                        option.value = user.deviceid;
+                        option.text = user.name + "-" + user.deviceid + "[" + user.Access + "]";
+                        userList.appendChild(option);
+                    });
+                } else {
+                    statusMessage.textContent = '사용자가 존재하지 않습니다.';
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                statusMessage.textContent = 'Error fetching user data';
+                }
+
+            grantAccessButton.addEventListener("click", async () => {
+                const selectedDeviceId = userList.value;
+                if (selectedDeviceId) {
+                    const response = await fetch(`/grant-access?deviceid=${selectedDeviceId}`, { method: 'POST' });
+                    const data = await response.json();
+                    statusMessage.textContent = data.message;
+                    location.reload();
+                }
+            });
+
+            revokeAccessButton.addEventListener("click", async () => {
+                const selectedDeviceId = userList.value;
+                if (selectedDeviceId) {
+                    const response = await fetch(`/revoke-access?deviceid=${selectedDeviceId}`, { method: 'POST' });
+                    const data = await response.json();
+                    statusMessage.textContent = data.message;
+                    location.reload();
+                }
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", async function () {
+
+            const busRouteList = document.getElementById("busRouteList");
+            const deleteBusRouteButton = document.getElementById("deleteBusRouteButton");
+            const busRouteStatusMessage = document.getElementById("busRouteStatusMessage");
+
+            try {
+                const busRouteResponse = await fetch('/bus-routes');
+                const busRoutes = await busRouteResponse.json();
+
+                if (busRoutes.length > 0) {
+                    busRoutes.forEach(route => {
+                        const option = document.createElement("option");
+                        option.value = route.stationName;
+                        option.text = route.stationName + " (Latitude: " + route.latitude + ", Longitude: " + route.longitude + ")";
+                        busRouteList.appendChild(option);
+                    });
+                } else {
+                    busRouteStatusMessage.textContent = '노선이 존재하지 않습니다.';
+                }
+            } catch (error) {
+                console.error("Error fetching bus route data:", error);
+                busRouteStatusMessage.textContent = 'Error fetching bus route data';
+            }
+
+            deleteBusRouteButton.addEventListener("click", async () => {
+                const selectedRouteId = busRouteList.value;
+                if (selectedRouteId) {
+                    const response = await fetch(`/delete-bus-route?stationName=${selectedRouteId}`, { method: 'POST' });
+                    const data = await response.json();
+                    busRouteStatusMessage.textContent = data.message;
+                    location.reload();
+                }
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", async function () {
+
+            const addBusRouteForm = document.getElementById("addBusRouteForm");
+            const addBusRouteStatusMessage = document.getElementById("addBusRouteStatusMessage");
+
+            addBusRouteForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const stationNameInput = document.getElementById("stationNameInput");
+                const latitudeInput = document.getElementById("latitudeInput");
+                const longitudeInput = document.getElementById("longitudeInput");
+
+                const newRouteData = {
+                    stationName: stationNameInput.value,
+                    latitude: latitudeInput.value,
+                    longitude: longitudeInput.value
+                };
+
+                try {
+                    const response = await fetch('/add-bus-route', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(newRouteData)
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        addBusRouteStatusMessage.textContent = '노선 추가를 성공했습니다.';
+                        stationNameInput.value = '';
+                        latitudeInput.value = '';
+                        longitudeInput.value = '';
+                    } else {
+                        addBusRouteStatusMessage.textContent = 'Error adding bus route';
+                    }
+                } catch (error) {
+                    console.error("Error adding bus route:", error);
+                    addBusRouteStatusMessage.textContent = 'Error adding bus route';
+                }
+                location.reload();
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            const buttonList = document.getElementById("buttonList");
+            const deleteButton = document.getElementById("deleteButton");
+            const buttonStatusMessage = document.getElementById("buttonStatusMessage");
+
+            try {
+                const response = await fetch('/button-list');
+                const buttons = await response.json();
+
+                if (buttons.length > 0) {
+                    buttons.forEach(button => {
+                        const option = document.createElement("option");
+                        option.value = button.assort;
+                        option.text = button.assort + "." + button.destination + button.type + "[" + button.time + "] " + button.buttonText;
+                        buttonList.appendChild(option);
+                    });
+                } else {
+                    buttonStatusMessage.textContent = '배차 정보가 존재하지 않습니다.';
+                }
+            } catch (error) {
+                console.error("Error fetching button data:", error);
+                buttonStatusMessage.textContent = 'Error fetching button data';
+            }
+
+            deleteButton.addEventListener("click", async () => {
+                const selectedButtonId = buttonList.value;
+                if (selectedButtonId) {
+                    const response = await fetch(`/delete-button?assort=${selectedButtonId}`, { method: 'POST' });
+                    const data = await response.json();
+                    buttonStatusMessage.textContent = data.message;
+                    location.reload();
+                }
+            });
+        });
+
+        $(document).ready(function() {
+            $('#buttonForm').submit(function(e) {
+            e.preventDefault();
+
+            const assort = $('#assort').val();
+            const destination = $('#destination').val();
+            const type = $('#type').val();
+            const time = $('#time').val();
+            const buttonText = $('#buttonText').val();
+
+            const data = {
+                assort,
+                destination,
+                type,
+                time,
+                buttonText,
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/save-button-data',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function(response) {
+                console.log('데이터가 성공적으로 저장되었습니다.');
+                },
+                error: function(err) {
+                console.error('데이터 저장 중 오류가 발생했습니다:', err);
+                },
+            });
+            location.reload();
+            });
+        });
+    </script>
+</body>
+</html>

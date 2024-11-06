@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>관리자 로그인</title>
+    <link rel="stylesheet" type="text/css" href="login.css">
+</head>
+<body>
+    <div class="login-box">
+        <div>
+            <img src="https://imgur.com/qWeA4BR.png">
+            <hr border-color: whitesmoke;">
+            <br />
+            <br />
+            <form id="login-form">
+                <div class="user-box">
+                    <input type="text" id="username" placeholder="사용자 이름" required> <br />
+                    <input type="password" id="password" placeholder="비밀번호" required>
+                </div>
+                <button type="submit" class="button">로그인</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginForm = document.getElementById('login-form');
+            loginForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.status === 200) {
+                    window.location.href = response.url;
+                } else {
+                    console.log("로그인 실패");
+                    const responseData = await response.json();
+                    alert(responseData.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

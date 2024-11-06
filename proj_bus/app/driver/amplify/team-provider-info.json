@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-busboridriver-dev-152912-authRole",
+      "UnauthRoleArn": "arn:aws:iam::244567065125:role/amplify-busboridriver-dev-152912-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::244567065125:role/amplify-busboridriver-dev-152912-authRole",
+      "Region": "ap-northeast-2",
+      "DeploymentBucketName": "amplify-busboridriver-dev-152912-deployment",
+      "UnauthRoleName": "amplify-busboridriver-dev-152912-unauthRole",
+      "StackName": "amplify-busboridriver-dev-152912",
+      "StackId": "arn:aws:cloudformation:ap-northeast-2:244567065125:stack/amplify-busboridriver-dev-152912/adfbbf30-5aa3-11ee-bb7d-0a64dd5120b2",
+      "AmplifyAppId": "d2dhr4bw1hff1m"
+    },
+    "categories": {
+      "api": {
+        "busboridriver": {}
+      }
+    }
+  }
+}

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시간표</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: center;
+            padding: 5px;
+            width: 100px;
+            font-size: 14px;
+        }
+        th {
+            background-color: #bbc5ff;
+            color: #ffffff;
+            font-weight: bold;
+        }
+        td {
+            vertical-align: middle;
+            line-height: 1.5;
+        }
+        .time-cell {
+            background-color: #eff1ff;
+            width: 100px;
+            white-space: nowrap;
+        }
+        .info-cell {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <table>
+    </table>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('userId');
+        const colors = ['#FA5858', '#FAAC58', '#01DF3A', '#58FAD0', '#58D3F7', '#5882FA', '#8258FA', '#AC58FA', '#D358F7', '#FA58F4', '#FA58AC', '#D7DF01', '#A5DF00', '#04B431', '#01DFA5', '#01DFD7', '#0174DF', '#0000FF', '#3A01DF', '#7401DF', '#A901DB', '#DF01D7', '#B40486', '#B4045F']; // 20가지의 연한 색상 목록
+
+        fetch(`/schedule_load`)
+        .then(response => response.json())
+            .then(scheduleData => {
+                const userScheduleData = scheduleData.scheduleData[userId];
+                const table = document.querySelector('table');
+
+                const headerRow = document.createElement('tr');
+                ['', '월요일', '화요일', '수요일', '목요일', '금요일'].forEach(day => {
+                    const th = document.createElement('th');
+                    th.textContent = day;
+                    headerRow.appendChild(th);
+                });
+                table.appendChild(headerRow);
+
+                let colorIndex = 0; // 색상 인덱스
+                const colorMap = {}; // 과목별로 색상 매핑
+
+                for (let i = 1; i <= 15; i++) {
+                    const row = document.createElement('tr');
+                    const cell1 = document.createElement('td');
+                    cell1.classList.add('time-cell');
+                    cell1.innerHTML = `${i}교시<br>${(i + 8) % 24}:30 - ${(i + 9) % 24}:20`;
+                    row.appendChild(cell1);
+                    for (let j = 1; j <= 5; j++) {
+                        const cell = document.createElement('td');
+                        cell.classList.add('info-cell');
+                        const day = ['월', '화', '수', '목', '금'][j - 1];
+                        const key = day + '(' + i + ')';
+                        const scheduleItem = userScheduleData.find(item => Object.keys(item)[0] === key);
+                        if (scheduleItem) {
+                            const data = scheduleItem[key].split('\n');
+                            const subject = data[0] || '';
+                            const division = data[1] || '';
+                            const professor = data[2] || '';
+                            const room = data[3] || '';
+
+                            // 색상 매핑
+                            if (!colorMap[subject] && subject.trim() !== '') {
+                                colorMap[subject] = colors[colorIndex];
+                                colorIndex = (colorIndex + 1) % colors.length;
+                            }
+
+                            // 각 셀에 배경색 지정
+                            cell.innerHTML = `${subject}<br>${division ? division + '분반 ' + room : room}<br>${professor}`;
+                            if (subject.trim() !== '') {
+                                cell.style.backgroundColor = colorMap[subject];
+                            }
+                        } else {
+                            cell.innerHTML = '';
+                        }
+                        row.appendChild(cell);
+                    }
+                    table.appendChild(row);
+                }
+            })
+            .catch(error => console.error('Error fetching schedule data:', error));
+    </script>
+</body>
+</html>

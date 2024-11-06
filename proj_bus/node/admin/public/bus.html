@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+    <link rel="stylesheet" type="text/css" href="admin_main.css">
+    <link rel="stylesheet" type="text/css" href="admin_style.css">
+</head>
+<body>
+    <div class="page">
+        <header>
+            <img src="https://imgur.com/te8FVKr.png">
+            <nav>
+                <ul>
+                    <li><a href="main.html">메인 화면</a></li>
+                    <li><a href="admin1.html">권한 수정</a></li>
+                    <li><a href="road.html">노선 수정</a></li>
+                    <li><a href="bus.html">배차 수정</a></li>
+                </ul>
+            </nav>
+        </header>
+    </div>
+
+    <div class="box effect5">
+        <h2>배차 추가 및 수정</h2>
+        <h4>추가 또는 수정할 배차 정보를 입력해주세요.</h4>
+        <form id="buttonForm">
+            <label for="assort">분류:</label>
+            <input type="text" id="assort" name="assort" required>
+
+            <label for="destination">목적지:</label>
+            <input type="text" id="destination" name="destination" required>
+
+            <label for="type">유형 (등교/하교):</label>
+            <input type="text" id="type" name="type" required>
+            <br />
+            <label for="time">시간:</label>
+            <input type="text" id="time" name="time" required>
+
+            <label for="buttonText">배차 수:</label>
+            <input type="text" id="buttonText" name="buttonText" required>
+
+            <button type="submit">배차 추가 / 수정</button>
+            <button type="reset" id="resetButton">초기화</button>
+        </form>
+    </div>
+
+    <div class="box effect4">
+        <h2>배차 삭제</h2>
+        <h4>삭제할 배차 정보를 선택해주세요.</h4>
+        <select id="buttonList"></select>
+        <button id="deleteButton">배차 삭제</button>
+        <p id="buttonStatusMessage"></p>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            const buttonList = document.getElementById("buttonList");
+            const deleteButton = document.getElementById("deleteButton");
+            const buttonStatusMessage = document.getElementById("buttonStatusMessage");
+
+            function updateFields(selectedButton) {
+                $('#assort').val(selectedButton.assort);
+                $('#destination').val(selectedButton.destination);
+                $('#type').val(selectedButton.type);
+                $('#time').val(selectedButton.time);
+                $('#buttonText').val(selectedButton.buttonText);
+            }
+
+            $('#resetButton').on('click', function () {
+                clearFields();
+            });
+
+            try {
+                const response = await fetch('/button-list');
+                let buttons = await response.json();
+
+                if (buttons.length > 0) {
+                    buttons = buttons.sort((a, b) => (a.assort > b.assort) ? 1 : -1);
+
+                    buttons.forEach(button => {
+                        const option = document.createElement("option");
+                        option.value = button.assort;
+                        option.text = button.assort + "." + button.destination + button.type + "[" + button.time + "] " + button.buttonText;
+                        buttonList.appendChild(option);
+                    });
+
+                    buttonList.addEventListener("change", function () {
+                        const selectedIndex = buttonList.selectedIndex;
+                        const selectedButton = buttons[selectedIndex];
+                        updateFields(selectedButton);
+                    });
+                } else {
+                    buttonStatusMessage.textContent = '배차 정보가 존재하지 않습니다.';
+                }
+            } catch (error) {
+                console.error("배차 데이터를 가져오는 중 오류 발생:", error);
+                buttonStatusMessage.textContent = '배차 데이터를 가져오는 중 오류 발생';
+            }
+
+            deleteButton.addEventListener("click", async () => {
+                const selectedButtonId = buttonList.value;
+                if (selectedButtonId) {
+                    const confirmDelete = confirm('정말로 삭제하시겠습니까?');
+
+                    if (confirmDelete) {
+                        const response = await fetch(`/delete-button?assort=${selectedButtonId}`, { method: 'POST' });
+                        const data = await response.json();
+                        buttonStatusMessage.textContent = data.message;
+                        location.reload();
+                    }
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            $('#buttonForm').submit(function (e) {
+                e.preventDefault();
+
+                const assort = $('#assort').val();
+                const destination = $('#destination').val();
+                const type = $('#type').val();
+                const time = $('#time').val();
+                const buttonText = $('#buttonText').val();
+
+                const data = {
+                    assort,
+                    destination,
+                    type,
+                    time,
+                    buttonText,
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/save-button-data',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        console.log('데이터가 성공적으로 저장되었습니다.');
+                    },
+                    error: function (err) {
+                        console.error('데이터 저장 중 오류가 발생했습니다:', err);
+                    },
+                });
+                location.reload();
+            });
+        });
+    </script>
+</body>
+</html>
