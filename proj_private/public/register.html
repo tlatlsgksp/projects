@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>회원가입</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                padding: 20px;
+            }
+            form {
+                max-width: 500px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                background-color: #f9f9f9;
+            }
+            input, button {
+                width: 100%;
+                padding: 10px;
+                margin: 10px 0;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+            button {
+                background-color: #4CAF50;
+                color: white;
+                cursor: pointer;
+            }
+            button:hover {
+                background-color: #45a049;
+            }
+            .input-group {
+                margin-bottom: 15px;
+            }
+            .hidden {
+                display: none;
+            }
+            .disabled {
+                background-color: #ddd;
+                cursor: not-allowed;
+            }
+        </style>
+    </head>
+<body>
+    <h1>회원가입</h1>
+    <form id="registerForm">
+        <!-- 아이디 -->
+        <div class="input-group">
+            <label for="id">아이디</label>
+            <input type="text" id="id" placeholder="아이디" required>
+            <button type="button" id="checkidBtn">아이디 중복 확인</button>
+            <span id="idError" style="color: red; display: none;">아이디가 이미 존재합니다.</span>
+        </div>
+
+        <!-- 닉네임 -->
+        <div class="input-group">
+            <label for="nickname">닉네임</label>
+            <input type="text" id="nickname" placeholder="닉네임" required>
+            <button type="button" id="checkNicknameBtn">닉네임 중복 확인</button>
+            <span id="nicknameError" style="color: red; display: none;">닉네임이 이미 존재합니다.</span>
+        </div>
+
+        <!-- 비밀번호 -->
+        <div class="input-group">
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" placeholder="비밀번호" required>
+        </div>
+
+        <!-- 비밀번호 확인 -->
+        <div class="input-group">
+            <label for="confirmPassword">비밀번호 확인</label>
+            <input type="password" id="confirmPassword" placeholder="비밀번호 확인" required>
+        </div>
+
+        <!-- 이름 -->
+        <div class="input-group">
+            <label for="name">이름</label>
+            <input type="text" id="name" placeholder="이름" required>
+        </div>
+
+        <!-- 생년월일 -->
+        <div class="input-group">
+            <label for="dob">생년월일</label>
+            <div>
+                <select id="dobYear" required>
+                    <option value="">년도</option>
+                </select>
+                <select id="dobMonth" required>
+                    <option value="">월</option>
+                </select>
+                <select id="dobDay" required>
+                    <option value="">일</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 이메일 주소 -->
+        <div class="input-group">
+            <label for="email">이메일 주소</label>
+            <input type="email" id="email" placeholder="이메일 주소" required>
+            <button type="button" id="sendEmailCodeBtn">이메일 인증 코드 전송</button>
+        </div>
+
+        <div id="emailVerificationContainer" class="hidden">
+            <p id="resendPrompt">이메일이 도착하지 않았나요? <button type="button" id="resendEmailCodeBtn">재전송</button></p>
+            <div class="input-group">
+                <label for="emailVerificationCode">인증 코드</label>
+                <input type="text" id="emailVerificationCode" placeholder="인증 코드" required>
+                <button type="button" id="verifyEmailBtn">인증 확인</button>
+            </div>
+            <p id="timerDisplay"></p>
+        </div>
+
+        <p id="emailVerifiedMessage" class="hidden" style="color: green;">이메일 인증이 완료되었습니다.</p>
+
+        <div class="button-container">
+            <button type="submit">회원가입</button>
+            <button onclick="window.location.href='/login.html'">돌아가기</button>
+        </div>
+    </form>
+
+    <script>
+        let isidAvailable = false;
+        let isNicknameAvailable = false;
+        let emailVerificationCode = '';
+        let isEmailVerified = false;
+        let timer;
+        let timeLeft = 600;
+
+        // 아이디 중복 확인
+        document.getElementById('checkidBtn').addEventListener('click', async () => {
+            const id = document.getElementById('id').value;
+            if (!id) {
+                alert('아이디를 입력하세요.');
+                return;
+            }
+
+            const response = await fetch(`/auth/check-id?id=${id}`);
+            const data = await response.json();
+            
+            if (data.available) {
+                alert('사용 가능한 아이디입니다.');
+                isidAvailable = true;
+                document.getElementById('idError').style.display = 'none';
+            } else {
+                alert('이미 존재하는 아이디입니다.');
+                isidAvailable = false;
+                document.getElementById('idError').style.display = 'block';
+            }
+        });
+
+        // 닉네임 중복 확인
+        document.getElementById('checkNicknameBtn').addEventListener('click', async () => {
+            const nickname = document.getElementById('nickname').value;
+            if (!nickname) {
+                alert('닉네임을 입력하세요.');
+                return;
+            }
+
+            const response = await fetch(`/auth/check-nickname?nickname=${nickname}`);
+            const data = await response.json();
+
+            if (data.available) {
+                alert('사용 가능한 닉네임입니다.');
+                isNicknameAvailable = true;
+                document.getElementById('nicknameError').style.display = 'none';
+            } else {
+                alert('이미 존재하는 닉네임입니다.');
+                isNicknameAvailable = false;
+                document.getElementById('nicknameError').style.display = 'block';
+            }
+        });
+
+        function startTimer() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timerDisplay').innerText = `${minutes}분 ${seconds}초 남음`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    document.getElementById('resendPrompt').innerHTML = '인증 코드가 만료되었습니다. <button type="button" id="resendEmailBtn">재전송</button>';
+                    document.getElementById('resendEmailBtn').addEventListener('click', sendEmailVerification);
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        // 이메일 형식 검증 함수
+        function validateEmail(email) {
+                const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                return emailPattern.test(email);
+            }
+
+        // 이메일 인증 코드 전송
+        async function sendEmailVerification() {
+            const email = document.getElementById('email').value;
+
+            if (!email) {
+                alert('이메일을 입력하세요.');
+                return;
+            }
+            if (!validateEmail(email)) {
+                alert('올바른 이메일 주소를 입력해주세요.');
+                return;
+            }
+            const response = await fetch('/auth/send-verification-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await response.json();
+            if (data.message === '인증 코드가 전송되었습니다.') {
+                emailVerificationCode = data.verificationCode;
+                alert('이메일로 인증 코드가 전송되었습니다.');
+                document.getElementById('sendEmailCodeBtn').classList.add('hidden');
+                document.getElementById('emailVerificationContainer').classList.remove('hidden');
+                timeLeft = 600;
+                startTimer();
+            } else {
+                alert('이메일 인증 실패');
+            }
+        }
+        
+        document.getElementById('sendEmailCodeBtn').addEventListener('click', sendEmailVerification);
+        document.getElementById('resendEmailCodeBtn').addEventListener('click', sendEmailVerification);
+
+        document.getElementById('verifyEmailBtn').addEventListener('click', () => {
+            const enteredCode = document.getElementById('emailVerificationCode').value;
+            if (enteredCode === emailVerificationCode) {
+                alert('이메일 인증이 완료되었습니다.');
+                isEmailVerified = true;
+                document.getElementById('emailVerificationContainer').classList.add('hidden');
+                document.getElementById('emailVerifiedMessage').classList.remove('hidden');
+                document.getElementById('email').setAttribute('disabled', 'true');
+            } else {
+                alert('인증 코드가 올바르지 않습니다.');
+            }
+        });
+        
+        // 회원가입 폼 제출
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // 입력 값 가져오기
+            const name = document.getElementById('name').value;
+            const nickname = document.getElementById('nickname').value;
+            const id = document.getElementById('id').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const email = document.getElementById('email').value;
+            const emailCode = document.getElementById('emailVerificationCode').value;
+            const dobYear = document.getElementById('dobYear').value;
+            const dobMonth = document.getElementById('dobMonth').value;
+            const dobDay = document.getElementById('dobDay').value;
+
+            // 비밀번호 확인
+            if (password !== confirmPassword) {
+                alert('비밀번호가 일치하지 않습니다.');
+                return;
+            }
+
+            // 아이디 중복 확인
+            if (!isidAvailable) {
+                alert('아이디 중복 확인을 먼저 해주세요.');
+                return;
+            }
+
+            // 닉네임 중복 확인
+            if (!isNicknameAvailable) {
+                alert('닉네임 중복 확인을 먼저 해주세요.');
+                return;
+            }
+
+            // 이메일 인증 확인
+            if (!isEmailVerified) {
+                alert('이메일 인증을 완료해주세요.');
+                return;
+            }
+
+            // 생년월일이 모두 선택되었는지 확인
+            if (!dobYear || !dobMonth || !dobDay) {
+                alert('생년월일을 모두 입력해주세요.');
+                return;
+            }
+
+            // 회원가입 요청
+            const response = await fetch('/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, id, password, nickname, email, dob: `${dobYear}-${dobMonth}-${dobDay}` })
+            });
+
+            const data = await response.json();
+            alert(data.message);
+
+            if (data.message === '회원가입이 완료되었습니다.') {
+                window.location.href = 'index.html';
+            }
+        });
+
+        window.onload = () => {
+            const yearSelect = document.getElementById('dobYear');
+            for (let i = 1900; i <= new Date().getFullYear(); i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                yearSelect.appendChild(option);
+            }
+
+            const monthSelect = document.getElementById('dobMonth');
+            for (let i = 1; i <= 12; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                monthSelect.appendChild(option);
+            }
+
+            const daySelect = document.getElementById('dobDay');
+            for (let i = 1; i <= 31; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                daySelect.appendChild(option);
+            }
+        };
+    </script>
+</body>
+</html>

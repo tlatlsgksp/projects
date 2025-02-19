@@ -1,5 +1,5 @@
 const { Configuration, OpenAI } = require("openai");
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, './chat.env') });
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
 const openaiConfig = {apiKey: OPENAI_API_KEY,};

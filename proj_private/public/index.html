@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메인 페이지</title>
+    <link rel="stylesheet" href="./css/index.css">
+    <script defer src="main.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">홈</a></li>
+                <li id="profile-link"><a href="profile.html">프로필</a></li>
+                <li id="community-link"><a href="community.html">게시판</a></li>
+                <li id="chat-link"><a href="chat.html">실시간 채팅</a></li>
+                <li id="market-link"><a href="market.html">중고 거래</a></li>
+                <li id="followers-link"><a href="followers.html">팔로우</a></li>
+                <li id="login-btn"><a href="login.html">로그인</a></li>
+                <li id="logout-btn"><button>로그아웃</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="user-info" style="display:none;">
+            <div id="user-details">
+                <img src="" id="profile-photo" alt="프로필 사진" width="50" height="50">
+                <p id="user-nickname"></p>
+                <p>팔로우: <span id="follow-count">0</span> | 팔로잉: <span id="following-count">0</span></p>
+                <p><a href="my-page.html">내 프로필 관리</a></p>
+            </div>
+        </section>
+
+        <section id="welcome-section">
+            <h1>환영합니다!</h1>
+            <p>다양한 기능을 활용해보세요.</p>
+        </section>
+
+        <section id="feature-section">
+            <h2>기능</h2>
+            <div class="feature-box">
+                <h3>게시판</h3>
+                <p><a href="community.html">게시판</a></p>
+            </div>
+            <div class="feature-box">
+                <h3>실시간 채팅</h3>
+                <p><a href="chat.html">실시간 채팅</a></p>
+            </div>
+            <div class="feature-box">
+                <h3>중고 거래</h3>
+                <p><a href="market.html">중고 거래</a></p>
+            </div>
+            <div class="feature-box">
+                <h3>팔로우 기능</h3>
+                <p><a href="followers.html">팔로우, 팔로잉 목록</a></p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 Your Website. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // 로그인 상태 확인
+        const token = localStorage.getItem('token');
+        if (token) {
+            // 로그인 후
+            document.getElementById('login-btn').style.display = 'none';
+            document.getElementById('logout-btn').style.display = 'block';
+            document.getElementById('user-info').style.display = 'block';
+
+            const response = await fetch('/profile/info', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, password })
+            });
+            // 예시 하드코딩
+            const userNickname = '예시';
+            const followCount = 10;
+            const followingCount = 15;
+            document.getElementById('user-nickname').innerText = userNickname;
+            document.getElementById('follow-count').innerText = followCount;
+            document.getElementById('following-count').innerText = followingCount;
+
+            // 로그아웃 버튼 동작
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = 'index.html';
+            });
+        } else {
+            // 로그인 안 한 경우
+            document.getElementById('login-btn').style.display = 'block';
+            document.getElementById('logout-btn').style.display = 'none';
+            document.getElementById('user-info').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

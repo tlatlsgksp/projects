@@ -1,0 +1,44 @@
+<body>
+    <h1>보호된 페이지</h1>
+    <div id="profile">
+        <h2>프로필 정보</h2>
+        <p><strong>아이디:</strong> <span id="id"></span></p>
+        <p><strong>이메일:</strong> <span id="email"></span></p>
+        <p><strong>가입일:</strong> <span id="created_at"></span></p>
+        <button onclick="logout()">로그아웃</button>
+    </div>
+
+    <script>
+        async function fetchProfile() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('로그인 후 사용 가능합니다.');
+                window.location.href = 'login.html';
+                return;
+            }
+            const response = await fetch('/profile/info', {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('id').textContent = data.id;
+                document.getElementById('email').textContent = data.email;
+                document.getElementById('created_at').textContent = new Date(data.created_at).toLocaleDateString();
+            } else {
+                console.error('Error:', response.status, await response.text());
+                alert('프로필 정보를 불러오지 못했습니다.');
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+
+        fetchProfile();
+    </script>
+</body>
