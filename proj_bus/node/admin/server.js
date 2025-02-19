@@ -236,10 +236,11 @@ app.post('/save-button-data', async (req, res) => {
   });
 
   app.post('/login', (req, res) => {
+    //예시 하드코딩
     const username = req.body.username;
     const password = req.body.password;
 
-    if (username === 'tlatlsgksp' && password === 'dlxorb127@') {
+    if (username === 'test' && password === 'test') {
         res.redirect('/main.html');
     } else {
         console.log("로그인 실패");
