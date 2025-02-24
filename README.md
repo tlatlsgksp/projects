@@ -18,7 +18,7 @@
 
 ### 2️⃣ Kyungdong Chatbot 🤖
 - **설명**: 경동대학교 챗봇 서비스로, 카카오톡을 통해 학교 정보를 제공합니다.
-- **🛠 기술 스택**: Node.js (Express), Kakao I Chatbot API
+- **🛠 기술 스택**: Node.js (Express), Kakao I Open Builder
 - **✨ 주요 기능**:
   - ✅ 학교 정보 제공 (학사 일정, 공지사항 등)
   - ✅ 사용자 질문 응답
