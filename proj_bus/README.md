@@ -36,7 +36,7 @@
 ## 🛠️ 기술 스택 및 구현 환경
 - **프로그래밍 언어**: JAVA
 - **프론트엔드 기술**: HTML, CSS
-- **백엔드 기술**: Node.js, Express.js
+- **백엔드 기술**: Node.js (Express.js)
 - **배포 플랫폼**: Google Cloud Platform
 - **기타 사용 기술**:
   - **API**: 공공 데이터 포털 API
