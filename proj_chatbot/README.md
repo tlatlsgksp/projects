@@ -18,7 +18,7 @@
 🔹 **프로그래밍 언어**: Node.js, JavaScript  
 🔹 **백엔드 기술**: Node.js (Express.js)  
 🔹 **데이터 관리**: Google Sheets API  
-🔹 **배포 환경**: 클라우드 기반 서버  
+🔹 **배포 플랫폼**: Google Cloud Platform
 🔹 **플랫폼**: Kakao i Open Builder, Dialogflow  
 
 ---
