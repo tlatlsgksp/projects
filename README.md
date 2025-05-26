@@ -26,11 +26,13 @@
 
 ---
 
-### 3️⃣ Personal Web Project 🌐 *(진행 중)*
-- **설명**: 개인 연습용 웹 애플리케이션 개발 프로젝트.
-- **🛠 기술 스택**: Node.js
+### 3️⃣ Cat Litter Service 🐱
+- **설명**: 고양이 화장실 대여 및 수거를 지원하는 구독 기반 서비스 플랫폼.
+- **🛠 기술 스택**: Node.js (Express), React.js, PostgreSQL (Prisma), Toss Payments, JWT
 - **✨ 주요 기능**:
-  - ✅ 사용자 인증 (로그인, 회원가입)
-  - ✅ CRUD 기능
-  - 🚀 실시간 채팅, 게시판, 중고거래, 팔로우 추가 예정
-- 🔗 [자세히 보기](./proj_private)
+  - ✅ 요금제 기반 정기 구독 시스템
+  - ✅ 장바구니, 주문 및 결제 기능
+  - ✅ 제품 즐겨찾기, 리뷰 작성 및 별점 기능
+  - ✅ 사용자 주소 관리 및 도서산간 자동 판별
+  - ✅ React Context 기반 API 상태 관리
+- 🔗 [자세히 보기](./proj_catlitterservice)
