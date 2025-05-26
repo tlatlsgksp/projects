@@ -1,0 +1,273 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  DELIVERING
+  DELIVERED
+  PICKUP_REQUESTED
+  PICKED_UP
+  CANCELLED
+}
+
+enum ProductType {
+  LITTERBOX
+  SAND
+  SCOOP
+  BAG
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  uuid         String        @unique @default(uuid())
+  username     String        @unique
+  email        String        @unique
+  password     String
+  name         String
+  phone        String?
+  role         UserRole      @default(USER)
+  addresses    Address[]
+  orders       Order[]
+  favorites    Favorite[]
+  subscription Subscription?
+  billingInfo  BillingInfo?
+  reviews      Review[]
+  carts        Cart[]
+  litterboxes   Litterbox[]
+  litterboxRotations LitterboxRotation[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+}
+
+model Address {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id])
+  address1   String   // 도로명 주소 전체
+  address2   String?  // 상세주소 (예: 101동 1202호)
+  zipcode    String   // 우편번호
+  isDefault  Boolean  @default(false)
+  isActive   Boolean  @default(false)
+  isServiceable Boolean @default(true)  // 수거 가능 여부
+  note          String?                 // 불가 사유 등 사용자 안내 메시지
+  orders     Order[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  brand       String?
+  summary     String? // 제품 한 줄 요약
+  description String? // 상세 설명
+  material    String? // 재질 (플라스틱 등)
+  dimensions  String? // 크기 (예: 40x30x20cm)
+  capacity    Int? // 용량 (예: 10L)
+  imageUrl    String? // 대표 이미지
+  imageUrls   String[] // 슬라이드/갤러리용 이미지 배열
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  type        ProductType
+  size        String? // 대, 중, 소
+  grainsize   String? // 입자
+  shape       String? // 형태
+  isActive    Boolean  @default(true)
+  isRequired  Boolean  @default(false)
+  favorites   Favorite[]
+  reviews     Review[]
+  averageRating Float? @default(0)
+  orderItems  OrderItem[]
+  carts       Cart[]
+  litterboxes   Litterbox[]
+}
+
+model Order {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id])
+  addressId Int
+  address   Address @relation(fields: [addressId], references: [id])
+  status          OrderStatus    @default(PENDING)
+  deliveryDate    DateTime?
+  pickupRequested Boolean        @default(false)
+  pickupRequest   PickupRequest?
+  isSubscription  Boolean        @default(false)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+  orderItems      OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+}
+
+model PickupRequest {
+  id          Int       @id @default(autoincrement())
+  orderId     Int       @unique
+  order       Order     @relation(fields: [orderId], references: [id])
+  note        String?
+  inHouse     Boolean   @default(false)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+  pickedUpAt  DateTime?
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+
+  @@unique([userId, productId])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  rating    Int
+  content   String
+  imageUrls     String[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+
+  @@unique([userId, productId])
+}
+
+  model SubscriptionTier {
+    id                     Int            @id @default(autoincrement())
+    name                   String         @unique
+    price                  Int
+    pickupPerMonth         Int
+    extra                  String?
+
+    maxLitterboxesPerOrder Int            @default(1)
+    monthlySandLimitLitre  Int            @default(10)
+    monthlyBagLimitLitre   Int            @default(10)
+    maxScoopsPerOrder      Int            @default(1)
+
+    activeLitterboxes      Int            @default(1) // 실제 사용 수량 (1/2/4)
+    totalAssignedLitterboxes Int          @default(2) // 총 배정 수량 (사용 + 교체용)
+
+    depositRequired        Boolean        @default(false) // 보증금 필요 여부
+    depositAmount          Int?                         // 보증금 금액 (예: 10000원)
+
+    subscriptions          Subscription[]
+    scheduledFor           Subscription[] @relation("ScheduledTier")
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @default(now()) @updatedAt
+  }
+
+model Cart {
+  id         Int       @id @default(autoincrement())
+  user       User      @relation(fields: [userId], references: [id])
+  userId     Int
+  product    Product   @relation(fields: [productId], references: [id])
+  productId  Int
+  quantity   Int       @default(1)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Subscription {
+  id              Int               @id @default(autoincrement())
+  userId          Int               @unique
+  user            User              @relation(fields: [userId], references: [id])
+  tierId          Int
+  tier            SubscriptionTier  @relation(fields: [tierId], references: [id])
+  scheduledTierId Int?
+  scheduledTier   SubscriptionTier? @relation("ScheduledTier", fields: [scheduledTierId], references: [id])
+  startDate       DateTime          @default(now())
+  endDate         DateTime?
+  isActive        Boolean           @default(true)
+  willCancel      Boolean           @default(false)
+  nextPickup      DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+}
+
+model Litterbox {
+  id           Int               @id @default(autoincrement())
+  productId    Int
+  product      Product           @relation(fields: [productId], references: [id])
+  status       LitterboxStatus   @default(AVAILABLE)
+  userId       Int?
+  user         User?             @relation(fields: [userId], references: [id])
+  rotations    LitterboxRotation[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @default(now()) @updatedAt
+}
+
+enum LitterboxStatus {
+  AVAILABLE     // 사용 가능
+  IN_USE        // 사용자 집에 설치됨
+  CLEANING      // 수거 후 세척 중
+  DAMAGED       // 파손
+  LOST          // 분실
+}
+
+model LitterboxRotation {
+  id            Int           @id @default(autoincrement())
+  litterboxId   Int
+  userId        Int
+  rotationType  RotationType
+  scheduledDate DateTime
+  completed     Boolean       @default(false)
+  note          String?
+
+  litterbox     Litterbox     @relation(fields: [litterboxId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+}
+
+enum RotationType {
+  DELIVERED
+  PICKED_UP
+  CLEANED
+  ASSIGNED
+  DAMAGED
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  model     String
+  action    String
+  recordId  Int
+  changes   Json
+  timestamp DateTime @default(now())
+}
+
+model BillingInfo {
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       Int      @unique
+  billingKey   String?
+  customerKey  String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
