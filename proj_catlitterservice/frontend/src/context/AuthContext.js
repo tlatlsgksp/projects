@@ -123,12 +123,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
     const publicPrefixes = ["/", "/login", "/register", "/products", "/about"];
     const isPublic = publicPrefixes.some(prefix =>
       window.location.pathname === prefix || window.location.pathname.startsWith(prefix + "/")
     );
 
-    if (!isPublic) {
+    if (token || !isPublic) {
       fetchCurrentUser();
     } else {
       setLoading(false);

@@ -18,6 +18,7 @@ import tiersRoutes from './routes/tiersRoutes.js';
 import subscriptionsRoutes from './routes/subscriptionsRoutes.js'
 import emailRoutes from "./routes/emailRoutes.js";
 import paymentRoutes from './routes/paymentRoutes.js';
+import reviewRoutes from "./routes/reviewRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -43,6 +44,7 @@ app.use('/api/tiers', tiersRoutes);
 app.use('/api/subscriptions', subscriptionsRoutes);
 app.use("/api/email", emailRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 /*
 function addOneMonth(date) {

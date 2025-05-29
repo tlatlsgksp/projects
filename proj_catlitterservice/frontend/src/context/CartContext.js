@@ -85,14 +85,19 @@ export const CartProvider = ({ children }) => {
       const res = await getMyCart();
       const currentCart = Array.isArray(res.data) ? res.data : [];
 
+      const targetItem = currentCart.find(item => item.id === cartItemId);
+      const isReducing = targetItem && newQuantity < targetItem.quantity;
+
       const updatedCart = currentCart.map(item =>
         item.id === cartItemId ? { ...item, quantity: newQuantity } : item
       );
 
-      const result = validateCartWithTier(updatedCart, subscription?.tier, monthlyUsage);
-      if (!result.valid) {
-        toast.error(result.message);
-        return false;
+      if (!isReducing) {
+        const result = validateCartWithTier(updatedCart, subscription?.tier, monthlyUsage);
+        if (!result.valid) {
+          toast.error(result.message);
+          return false;
+        }
       }
 
       await updateCartItem(cartItemId, newQuantity);
@@ -127,6 +132,7 @@ export const CartProvider = ({ children }) => {
         addToCartWithValidation,
         updateCartItemWithValidation,
         deleteCartItemById,
+        validateCartWithTier,
       }}
     >
       {children}
@@ -139,7 +145,7 @@ export const useCart = () => useContext(CartContext);
 // ✅ 장바구니 검증 함수
 const validateCartWithTier = (cart, tier, monthlyUsage = null) => {
   if (!tier) return { valid: true };
-
+  
   let litterboxCount = 0;
   let sandLitre = 0;
   let bagLitre = 0;

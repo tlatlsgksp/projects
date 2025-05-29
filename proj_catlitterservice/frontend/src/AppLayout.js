@@ -4,7 +4,6 @@ import 'swiper/css/navigation';
 import { Toaster } from 'react-hot-toast';
 import { useLocation, Routes, Route } from 'react-router-dom';
 import { AnimatePresence } from "framer-motion";
-import PrivateRoute from './components/PrivateRoute';
 
 import { OrderPanelProvider } from './context/OrderPanelContext';
 import { AuthProvider } from "./context/AuthContext";
@@ -16,42 +15,44 @@ import { SubscriptionProvider } from "./context/SubscriptionContext";
 import { TierProvider } from "./context/TierContext";
 import { OrderProvider } from "./context/OrderContext";
 import { PaymentProvider } from "./context/PaymentContext";
+import { ReviewProvider } from "./context/ReviewContext";
 
-import Header from './components/Header';
-import Footer from './components/Footer';
-import CursorTrail from "./components/CursorTrail";
-import BottomBar from './components/BottomBar';
+import Header from './components/Utils/Header';
+import Footer from './components/Utils/Footer';
+import CursorTrail from "./components/Utils/CursorTrail";
+import BottomBar from './components/Utils/BottomBar';
+import PrivateRoute from './components/Utils/PrivateRoute';
+import SubscriptionsRoute from './components/Utils/SubscriptionsRoute';
 
-import HomePage from './pages/Home';
-import AboutPage from './pages/About';
-import LoginPage from './pages/Login';
-import RegisterPage from './pages/Register';
+import HomePage from './pages/Main/Home';
+import AboutPage from './pages/Main/About';
 
-import ProductPage from './pages/Products';
-import ProductsDetailPage from './pages/ProductsDetail';
-import FavoriteProductsPage from './pages/FavoriteProducts';
+import LoginPage from './pages/Sign/Login';
+import RegisterPage from './pages/Sign/Register';
 
-import CartPage from "./pages/Cart";
+import ProductPage from './pages/Products/Products';
+import ProductsDetailPage from './pages/Products/ProductsDetail';
+import FavoriteProductsPage from './pages/Products/FavoriteProducts';
+import CartPage from "./pages/Products/Cart";
 
-import MyPage from './pages/MyPage';
+import MyPage from './pages/Mypages/MyPage';
+import ProfilePage from "./pages/Mypages/Profile";
+import ProfileEditPage from './pages/Mypages/ProfileEdit';
 
-import ProfilePage from "./pages/Profile";
-import ProfileEditPage from './pages/ProfileEdit';
+import AddressPage from './pages/Addresses/Address';
+import AddressNewPage from "./pages/Addresses/AddressNew";
+import AddressEditPage from "./pages/Addresses/AddressEdit";
 
-import AddressPage from './pages/Address';
-import AddressNewPage from "./pages/AddressNew";
-import AddressEditPage from "./pages/AddressEdit";
+import SubscriptionsSignPage from './pages/Subscriptions/SubscriptionsSign';
+import SubscriptionsInfoPage from './pages/Subscriptions/SubscriptionsInfo';
 
-import SubscriptionsSignPage from './pages/SubscriptionsSign';
-import SubscriptionsInfoPage from './pages/SubscriptionsInfo';
+import OrdersPage from './pages/Orders/Orders'
+import OrdersNewPage from './pages/Orders/OrdersNew'
+import OrdersDetailPage from './pages/Orders/OrdersDetail';
 
-import OrdersPage from './pages/Orders'
-import OrdersNewPage from './pages/OrdersNew'
-import OrdersDetailPage from './pages/OrdersDetail';
-
-import PaymentBillingSuccessPage from "./pages/PaymentBillingSuccess";
-import PaymentSuccessPage from "./pages/PaymentSuccess";
-import PaymentFailPage from "./pages/PaymentFail";
+import PaymentBillingSuccessPage from "./pages/Payments/PaymentBillingSuccess";
+import PaymentSuccessPage from "./pages/Payments/PaymentSuccess";
+import PaymentFailPage from "./pages/Payments/PaymentFail";
 
 function AppLayout() {
   const location = useLocation();
@@ -67,79 +68,79 @@ function AppLayout() {
         <AddressProvider>
           <ProductProvider>
             <FavoriteProvider>
-              <SubscriptionProvider>
-                <TierProvider>
-                  <OrderProvider>
-                    <CartProvider>
-                      <PaymentProvider>
-                        <OrderPanelProvider>
-                          <AnimatePresence>
-                            <div key={location.pathname}>
-                              <Toaster position="top-center" />
-                              <CursorTrail />
-                              <div className="font-sans bg-gray-50 min-h-screen">
-                                {/* Header */}
-                                <Header />
+              <ReviewProvider>
+                <SubscriptionProvider>
+                  <TierProvider>
+                    <OrderProvider>
+                      <CartProvider>
+                        <PaymentProvider>
+                          <OrderPanelProvider>
+                            <AnimatePresence>
+                              <div key={location.pathname}>
+                                <Toaster position="top-center" />
+                                <CursorTrail />
+                                <div className="font-sans bg-gray-50 min-h-screen">
+                                  {/* Header */}
+                                  <Header />
 
-                                {/* Route */}
-                                <main className="max-w-7xl mx-auto px-4 py-6">
-                                  <Routes location={location}>
-                                    <Route path="/" element={<HomePage />} />
-                                    <Route path="/about" element={<AboutPage />} />
-                                    <Route path="/login" element={<LoginPage />} />
-                                    <Route path="/register" element={<RegisterPage />} />
-                                    <Route path="/products" element={<ProductPage />} />
-                                    <Route path="/products/:id" element={<ProductsDetailPage />} />
+                                  {/* Route */}
+                                  <main className="max-w-7xl mx-auto px-4 py-6">
+                                    <Routes location={location}>
+                                      <Route path="/" element={<HomePage />} />
+                                      <Route path="/about" element={<AboutPage />} />
+                                      <Route path="/login" element={<LoginPage />} />
+                                      <Route path="/register" element={<RegisterPage />} />
+                                      <Route path="/products" element={<ProductPage />} />
+                                      <Route path="/products/:id" element={<ProductsDetailPage />} />
 
-                                    <Route element={<PrivateRoute />}>
-                                      <Route path="/cart" element={<CartPage />} />
+                                      <Route element={<PrivateRoute />}>
+                                        <Route path="/mypage" element={<MyPage />} />
+                                        <Route path="/mypage/profile" element={<ProfilePage />} />
+                                        <Route path="/mypage/profile/edit" element={<ProfileEditPage />} />
+                                        <Route path="/mypage/addresses" element={<AddressPage />} />
+                                        <Route path="/mypage/addresses/new" element={<AddressNewPage />} />
+                                        <Route path="/mypage/addresses/:id/edit" element={<AddressEditPage />} />
+                                        <Route path="/mypage/favorites" element={<FavoriteProductsPage />} />
+                                        
+                                        <Route path="/mypage/subscriptionsinfo" element={<SubscriptionsInfoPage />} />
+                                        <Route path="/subscriptionssign" element={<SubscriptionsSignPage />} />
+                                        
+                                        <Route path="/mypage/orders" element={<OrdersPage />} />
+                                        <Route path="/orders/:id" element={<OrdersDetailPage />} />
 
-                                      <Route path="/mypage" element={<MyPage />} />
-                                      <Route path="/mypage/profile" element={<ProfilePage />} />
-                                      <Route path="/mypage/profile/edit" element={<ProfileEditPage />} />
-                                      <Route path="/mypage/addresses" element={<AddressPage />} />
-                                      <Route path="/mypage/addresses/new" element={<AddressNewPage />} />
-                                      <Route path="/mypage/addresses/:id/edit" element={<AddressEditPage />} />
-                                      <Route path="/mypage/favorites" element={<FavoriteProductsPage />} />
+                                        <Route path="/payment/fail" element={<PaymentFailPage />} />
 
-                                      <Route path="/mypage/subscriptionsinfo" element={<SubscriptionsInfoPage />} />
-                                      <Route path="/subscriptionssign" element={<SubscriptionsSignPage />} />
-                                      
-                                      <Route path="/mypage/orders" element={<OrdersPage />} />
-                                      <Route path="/orders/new" element={<OrdersNewPage />} />
-                                      <Route path="/orders/:id" element={<OrdersDetailPage />} />
+                                        <Route element={<SubscriptionsRoute />}>
+                                          <Route path="/cart" element={<CartPage />} />
+                                          <Route path="/orders/new" element={<OrdersNewPage />} />
+                                          <Route path="/payment/billing/success" element={<PaymentBillingSuccessPage />} />
+                                          <Route path="/payment/success" element={<PaymentSuccessPage />} />
+                                        </Route>
+                                      </Route>
+                                    </Routes>
+                                  </main>
 
-                                      
+                                  {/* Footer */}
+                                  <Footer />
+                                </div>
 
-                                      <Route path="/payment/billing/success" element={<PaymentBillingSuccessPage />} />
-                                      <Route path="/payment/success" element={<PaymentSuccessPage />} />
-                                      <Route path="/payment/fail" element={<PaymentFailPage />} />
-                                      
-                                      
-                                    </Route>
-                                  </Routes>
-                                </main>
-
-                                {/* Footer */}
-                                <Footer />
+                                {!shouldHide && (
+                                  <BottomBar
+                                    showApply={!isProductDetailPage}
+                                    showFavorite={isProductDetailPage}
+                                    showAddToCart={isProductDetailPage}
+                                    productId={productId}
+                                  />
+                                )}
                               </div>
-
-                              {!shouldHide && (
-                                <BottomBar
-                                  showApply={!isProductDetailPage}
-                                  showFavorite={isProductDetailPage}
-                                  showAddToCart={isProductDetailPage}
-                                  productId={productId}
-                                />
-                              )}
-                            </div>
-                          </AnimatePresence>
-                        </OrderPanelProvider>
-                      </PaymentProvider>
-                    </CartProvider>
-                  </OrderProvider>
-                </TierProvider>
-              </SubscriptionProvider>
+                            </AnimatePresence>
+                          </OrderPanelProvider>
+                        </PaymentProvider>
+                      </CartProvider>
+                    </OrderProvider>
+                  </TierProvider>
+                </SubscriptionProvider>
+              </ReviewProvider>
             </FavoriteProvider>
           </ProductProvider>
         </AddressProvider>

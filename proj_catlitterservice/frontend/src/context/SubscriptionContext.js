@@ -13,16 +13,19 @@ const SubscriptionContext = createContext();
 
 export const SubscriptionProvider = ({ children }) => {
   const [subscription, setSubscription] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
 
   const fetchSubscription = useCallback(async () => {
     if (!isAuthenticated) return;
-
+    setLoading(true);
     try {
       const res = await getMySubscription();
       setSubscription(res.data);
     } catch (err) {
       setSubscription(null);
+    } finally {
+      setLoading(false);
     }
   }, [isAuthenticated]);
 
@@ -82,6 +85,7 @@ export const SubscriptionProvider = ({ children }) => {
     <SubscriptionContext.Provider
       value={{
         subscription,
+        loading,
         fetchSubscription,
         requestCancel,
         requestRevertCancel,

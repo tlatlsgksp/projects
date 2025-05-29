@@ -67,6 +67,24 @@ export const ProductProvider = ({ children }) => {
     }
   }, []);
 
+  const updateFavoriteCount = useCallback((productId, delta) => {
+    setProductMap(prev => {
+      const product = prev[productId];
+      if (!product) return prev;
+
+      const currentCount = product.favorites?.length || 0;
+      const updatedProduct = {
+        ...product,
+        favorites: Array(currentCount + delta).fill({ id: 'dummy' }),
+      };
+
+      return {
+        ...prev,
+        [productId]: updatedProduct,
+      };
+    });
+  }, []);
+
   return (
     <ProductContext.Provider value={{
       products,
@@ -78,6 +96,7 @@ export const ProductProvider = ({ children }) => {
       fetchRecommended,
       fetchProductById,
       fetchVariantsByProduct,
+      updateFavoriteCount
     }}>
       {children}
     </ProductContext.Provider>
